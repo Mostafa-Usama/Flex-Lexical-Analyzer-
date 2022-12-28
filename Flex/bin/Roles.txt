@@ -1,0 +1,131 @@
+/* 
+ 
+ */
+
+	
+%option noyywrap
+  
+	
+%{
+#include <stdlib.h>
+#include <string.h>
+
+%}
+
+
+/*//Keywords*/
+Keyword abstract|assert|boolean|break|byte|case|char|catch|catch|class|const|continue|default|do|double|double|enum|extends|final|finally|finally|for|float|if|goto|implements|import|instanceof|int|interface|long|main|native|new|package|private|protected|public|static|return|short|super|instanceof|switch|instanceof|this|throw|throws|transient|try|void|volatile|while
+
+
+/*//identifier */
+digit	[0-9]
+letter	[A-Za-z_]
+id	{letter}({letter}|{digit})*
+
+/*//integer literals
+//1-decimal*/
+decimal	([1-9][0-9]*(l|L))|(0(l|L))
+/*//2-hexadecimal*/
+hexadigit [0-9a-fA-F]
+hexa	0(X|x){hexadigit}+(l|L)
+/*//3-octal*/
+octaldigit [0-7]
+octal	0{octaldigit}+(l|L)
+/*//4-binary*/
+binarydigit [0-1]
+binary	0(b|B){binarydigit}+(l|L)
+
+/*//integer*/
+integer {decimal}|{hexa}|{octal}|{binary}
+
+/*//Floating-Point Literals*/
+sign [+-]
+ExponentPart  (E|e){sign}?{digit}+
+float {sign}?{digit}*\.{digit}+{ExponentPart}?(F|f|d|D)
+
+/*//Boolean Literals*/
+boolean	true|false
+
+/*//single line comment*/
+comment	"//".*
+
+/*//Multiline comment*/
+MultiComment	[/][*][^*]*[*]+([^*/][^*]*[*]+)*[/]        
+
+/*//EscapeSequence we will use it in char,string*/
+EscapeSequence \\u{hexadigit}{4}
+
+
+/*//character Literals*/
+char ('[^'\\]')|('{EscapeSequence}')
+
+
+/*//string Literals*/
+string \"([^"\\]|{EscapeSequence})*\"
+
+
+/*//The Null Literal*/
+nullliteral	null
+
+/*//white space*/
+space [ \t\f\n\r]
+
+/*//Separators*/
+Separator ([{};,@])|")"|"("|"["|"]"|"."|"..."|"::"
+
+/*//Operators*/
+Operator "="|">"|"<"|"!"|"~"|"?"|":"|"-"|"*"|"/"|"+"|"%"|"^"|"&"|"->"|"=="|">="|"<="|"!="|"&&"|"||"|"++"|"--"|"<<"|">>"|"+="|"-="|"*="|"/="|"&="|"|="|"^="|"%="
+
+%%
+{comment}	{ /* DO NOTHING */ }
+{MultiComment}      { /* DO NOTHING */ }
+{integer}		{printf("<%s,Integer>\n",yytext);}
+
+{Separator}	{printf("<%s,separator>\n",yytext);}
+{Operator}	{printf("<%s,operator>\n",yytext);}
+{Keyword}	{printf("<%s,Keyword>\n",yytext);}
+
+{nullliteral}	{printf("<%s,Nullliteral>\n",yytext);}
+
+{char}		{printf("<%s,Character>\n",yytext);}  
+{string}		{printf("<%s,String>\n",yytext);}
+
+{boolean}		{printf("<%s,Boolean>\n",yytext);}
+
+{id}		{printf("<%s,Identifier>\n",yytext);}
+
+
+{space}		{ /* DO NOTHING */ }
+{float}		{printf("<%s,Float>\n",yytext);}	
+	
+	
+
+%%
+	/* ----- USER CODE PART ----- */
+	/* ========================== */
+void main(argc, argv)
+int argc;
+char **argv;
+{
+	YY_BUFFER_STATE bp;
+	extern FILE* yyin;
+	
+	if (argc>1) {
+		yyin = fopen(argv[1],"r");
+	} else {
+		yyin = stdin;
+		bp = yy_create_buffer(yyin, YY_BUF_SIZE); // YY_BUF_SIZE defined by flex, typically 16K=16384
+		yy_switch_to_buffer(bp);  // tell it to use the buffer we just made
+	}
+	yylex();
+
+}
+
+
+
+
+
+
+
+ 
+/**/
